@@ -1,0 +1,80 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<%@page import="java.sql.Connection"%>
+<%@page import="java.sql.PreparedStatement"%>
+<%@ page
+    import="org.apache.commons.fileupload.servlet.ServletFileUpload"%>
+<%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory"%>
+<%@ page import="org.apache.commons.fileupload.*"%>
+
+<%@ page import="java.util.*,java.io.*"%>
+<%@ page import="java.util.Iterator"%>
+<%@ page import="java.util.List"%>
+<%@ page import="java.util.Map"%>
+<%@ page import="java.io.File"%>
+<%@ page import="org.apache.poi.hssf.usermodel.HSSFCell"%>
+<%@ page import="org.apache.poi.hssf.usermodel.HSSFRow"%>
+<%@ page import="org.apache.poi.hssf.usermodel.HSSFSheet"%>
+<%@ page import="org.apache.poi.hssf.usermodel.HSSFWorkbook"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>Process</h1>
+	<%
+	    try {
+	        boolean isMultipart = ServletFileUpload
+	                .isMultipartContent(request);
+	        if (!isMultipart) {
+	        } else {
+	            FileItemFactory factory = new DiskFileItemFactory();
+	            ServletFileUpload upload = new ServletFileUpload(factory);
+	            List items = null;
+	            try {
+	                items = upload.parseRequest(request);
+	            } catch (FileUploadException e) {
+	                e.getMessage();
+	            }
+	            
+	            FileItem itemSelect = (FileItem) items.get(0);
+	            if( itemSelect.isFormField() )
+	            {
+	              String fieldName = itemSelect.getFieldName();
+	              String value = itemSelect.getString();
+	              System.out.println("Select Option "+  fieldName + " ");
+	            }
+	            //Date d = new Date();
+	            FileItem item = (FileItem) items.get(1);
+	            //InputStream is=item.getInputStream();
+	             HSSFWorkbook workbook = new HSSFWorkbook(item.getInputStream());
+	             HSSFSheet sh = (HSSFSheet) workbook.getSheetAt(0);
+                 Iterator<HSSFRow> rowIterator = sh.rowIterator();
+                 while(rowIterator.hasNext()) {
+                    HSSFRow row = rowIterator.next();
+                    Iterator<HSSFCell> cellIterator = row.cellIterator();
+                    while(cellIterator.hasNext()) {
+                    	HSSFCell cell = cellIterator.next();
+                    	try{
+                    		System.out.print(cell.getStringCellValue() + "| ");
+                    	} catch (Exception e){
+                    		try{
+                        		System.out.print(cell.getNumericCellValue() + "| ");
+                    		}catch(Exception ex) {
+                    			
+                    		}
+                    	}
+                    	
+                    }
+                 }
+	 	         System.out.println("Success");
+	          }
+	    }catch(Exception e){
+	        e.printStackTrace();
+	        System.out.println("Error Occured: " + e.getMessage());
+	    }
+	%>
+</body>
+</html>
